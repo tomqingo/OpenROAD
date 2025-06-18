@@ -305,6 +305,9 @@ void Cluster::copyInstances(const Cluster& cluster)
     leaf_macros_.insert(leaf_macros_.end(),
                         cluster.leaf_macros_.begin(),
                         cluster.leaf_macros_.end());
+    hard_macros_.insert(hard_macros_.end(),
+                        cluster.hard_macros_.begin(),
+                        cluster.hard_macros_.end());
   } else if (type_ == StdCellCluster) {
     leaf_std_cells_.insert(leaf_std_cells_.end(),
                            cluster.leaf_std_cells_.begin(),
@@ -319,6 +322,9 @@ void Cluster::copyInstances(const Cluster& cluster)
     leaf_std_cells_.insert(leaf_std_cells_.end(),
                            cluster.leaf_std_cells_.begin(),
                            cluster.leaf_std_cells_.end());
+    hard_macros_.insert(hard_macros_.end(),
+                        cluster.hard_macros_.begin(),
+                        cluster.hard_macros_.end());
     db_modules_.insert(db_modules_.end(),
                        cluster.db_modules_.begin(),
                        cluster.db_modules_.end());
@@ -486,8 +492,10 @@ void Cluster::setParent(Cluster* parent)
 
 void Cluster::addChild(std::unique_ptr<Cluster> child)
 {
+  // children_.push_back(std::move(child));
   children_.push_back(std::move(child));
 }
+
 
 std::unique_ptr<Cluster> Cluster::releaseChild(const Cluster* candidate)
 {
@@ -570,7 +578,10 @@ bool Cluster::attemptMerge(Cluster* incomer, bool& incomer_deleted)
 // Connection signature support
 void Cluster::initConnection()
 {
-  connection_map_.clear();
+  if (connection_map_.size() > 0)
+  {
+    connection_map_.clear();
+  }
 }
 
 void Cluster::addConnection(int cluster_id, float weight)
@@ -1146,6 +1157,13 @@ void SoftMacro::setHeight(float height)
   }
 }
 
+void SoftMacro::setShapeDirect(float w, float h)
+{
+   width_ = w;
+   height_ = h;
+   area_ = width_ * height_;
+}
+
 void SoftMacro::shrinkArea(float percent)
 {
   if (percent < 0.0) {
@@ -1223,8 +1241,9 @@ void SoftMacro::setShapes(const std::vector<std::pair<float, float>>& shapes,
   area_ = shapes[0].first * shapes[0].second;
 }
 
-// This function for specify shape curves (piecewise function),
+// This function for specify shape curves (piecewise linear function?),
 // for StdCellCluster and MixedCluster
+
 void SoftMacro::setShapes(
     const std::vector<std::pair<float, float>>& width_list,
     float area)
@@ -1234,12 +1253,16 @@ void SoftMacro::setShapes(
       || cluster_->getClusterType() == HardMacroCluster) {
     return;
   }
+  // How to calculate the width_list and height_list?
   area_ = area;
   width_list_.clear();
   height_list_.clear();
   // sort width list based
   height_list_ = width_list;
+  
+  // height is sorted from the smaller one to the larger one
   std::sort(height_list_.begin(), height_list_.end(), comparePairFirst);
+
   for (auto& shape : height_list_) {
     if (width_list_.empty()
         || shape.first > width_list_[width_list_.size() - 1].second) {
@@ -1248,12 +1271,17 @@ void SoftMacro::setShapes(
       width_list_[width_list_.size() - 1].second = shape.second;
     }
   }
+  
+  // height_list : intermediate results (curve results)
   height_list_.clear();
   for (auto& shape : width_list_) {
     height_list_.emplace_back(area / shape.first, area / shape.second);
   }
+
+  // smallest width, largest height
   width_ = width_list_[0].first;
   height_ = height_list_[0].first;
+
 }
 
 float SoftMacro::getArea() const

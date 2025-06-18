@@ -122,6 +122,11 @@ void defout_impl::selectNet(dbNet* net)
   _select_net_list.push_back(net);
 }
 
+void defout_impl::clearNet()
+{
+  _select_net_list.clear();
+}
+
 void defout_impl::selectInst(dbInst* inst)
 {
   if (!inst) {
@@ -130,8 +135,14 @@ void defout_impl::selectInst(dbInst* inst)
   _select_inst_list.push_back(inst);
 }
 
-bool defout_impl::writeBlock(dbBlock* block, const char* def_file)
+void defout_impl::clearInst()
 {
+  _select_inst_list.clear();
+}
+
+bool defout_impl::writeBlock(dbBlock* block, const char* def_file, bool layer)
+{
+  // mark the mapping in the _select_net_list
   if (!_select_net_list.empty()) {
     _select_net_map = new dbMap<dbNet, char>(block->getNets());
     std::list<dbNet*>::iterator sitr;
@@ -139,12 +150,14 @@ bool defout_impl::writeBlock(dbBlock* block, const char* def_file)
          ++sitr) {
       dbNet* net = *sitr;
       (*_select_net_map)[net] = 1;
+
       if (net->isSpecial() || net->isMark_1ed()) {
         continue;
       }
       if (!_select_inst_map) {
         _select_inst_map = new dbMap<dbInst, char>(block->getInsts());
       }
+      // io ports?
       dbSet<dbITerm> iterms = net->getITerms();
       dbSet<dbITerm>::iterator titr;
       for (titr = iterms.begin(); titr != iterms.end(); ++titr) {
@@ -153,6 +166,8 @@ bool defout_impl::writeBlock(dbBlock* block, const char* def_file)
       }
     }
   }
+
+  // mark the mapping in the _select_inst_list
   if (!_select_inst_list.empty()) {
     if (!_select_inst_map) {
       _select_inst_map = new dbMap<dbInst, char>(block->getInsts());
@@ -203,6 +218,7 @@ bool defout_impl::writeBlock(dbBlock* block, const char* def_file)
   if (_version < defout::DEF_5_6) {
     fprintf(_out, "NAMESCASESENSITIVE ON ;\n");
   }
+
   char hd = block->getHierarchyDelimeter();
 
   if (hd == 0) {
@@ -248,7 +264,12 @@ bool defout_impl::writeBlock(dbBlock* block, const char* def_file)
   if (_version == defout::DEF_5_8) {
     writeComponentMaskShift(block);
   }
-  writeInsts(block);
+
+  if (layer)
+    writeInstsLayer(block);
+  else
+    writeInsts(block);
+
   writeBTerms(block);
   writePinProperties(block);
   writeBlockages(block);
@@ -266,6 +287,149 @@ bool defout_impl::writeBlock(dbBlock* block, const char* def_file)
   }
   return true;
 }
+
+// bool defout_impl::writeBlockLayer(dbBlock* block, const char* def_file)
+// {
+//   // mark the mapping in the _select_net_list
+//   if (!_select_net_list.empty()) {
+//     _select_net_map = new dbMap<dbNet, char>(block->getNets());
+//     std::list<dbNet*>::iterator sitr;
+//     for (sitr = _select_net_list.begin(); sitr != _select_net_list.end();
+//          ++sitr) {
+//       dbNet* net = *sitr;
+//       (*_select_net_map)[net] = 1;
+
+//       if (net->isSpecial() || net->isMark_1ed()) {
+//         continue;
+//       }
+//       if (!_select_inst_map) {
+//         _select_inst_map = new dbMap<dbInst, char>(block->getInsts());
+//       }
+//       // io ports?
+//       dbSet<dbITerm> iterms = net->getITerms();
+//       dbSet<dbITerm>::iterator titr;
+//       for (titr = iterms.begin(); titr != iterms.end(); ++titr) {
+//         dbInst* inst = (*titr)->getInst();
+//         (*_select_inst_map)[inst] = 1;
+//       }
+//     }
+//   }
+
+//   // mark the mapping in the _select_inst_list
+//   if (!_select_inst_list.empty()) {
+//     if (!_select_inst_map) {
+//       _select_inst_map = new dbMap<dbInst, char>(block->getInsts());
+//     }
+//     std::list<dbInst*>::iterator xitr;
+//     for (xitr = _select_inst_list.begin(); xitr != _select_inst_list.end();
+//          ++xitr) {
+//       dbInst* inst = *xitr;
+//       (*_select_inst_map)[inst] = 1;
+//     }
+//   }
+
+//   _dist_factor
+//       = (double) block->getDefUnits() / (double) block->getDbUnitsPerMicron();
+//   utl::FileHandler fileHandler(def_file);
+//   _out = fileHandler.getFile();
+
+//   if (_out == nullptr) {
+//     _logger->warn(
+//         utl::ODB, 172, "Cannot open DEF file ({}) for writing", def_file);
+//     return false;
+//   }
+
+//   // By default C File*'s are line buffered which means they get dumped on every
+//   // newline, which is nominally pretty expensive. This makes it so that the
+//   // writes are buffered according to the block size which on modern systems can
+//   // be as much as 16kb. DEF's have a lot of newlines, and are large in size
+//   // which makes writing them really slow with line buffering.
+//   //
+//   // The following lines enable IO buffering based on disk block size.
+//   struct stat stats;
+//   fstat(fileno(_out), &stats);
+//   setvbuf(_out, nullptr, _IOFBF, stats.st_blksize);
+
+//   if (_version == defout::DEF_5_3) {
+//     fprintf(_out, "VERSION 5.3 ;\n");
+//   } else if (_version == defout::DEF_5_4) {
+//     fprintf(_out, "VERSION 5.4 ;\n");
+//   } else if (_version == defout::DEF_5_5) {
+//     fprintf(_out, "VERSION 5.5 ;\n");
+//   } else if (_version == defout::DEF_5_6) {
+//     fprintf(_out, "VERSION 5.6 ;\n");
+//   } else if (_version == defout::DEF_5_7) {
+//     fprintf(_out, "VERSION 5.7 ;\n");
+//   } else if (_version == defout::DEF_5_8) {
+//     fprintf(_out, "VERSION 5.8 ;\n");
+//   }
+//   if (_version < defout::DEF_5_6) {
+//     fprintf(_out, "NAMESCASESENSITIVE ON ;\n");
+//   }
+
+//   char hd = block->getHierarchyDelimeter();
+
+//   if (hd == 0) {
+//     hd = '|';
+//   }
+
+//   fprintf(_out, "DIVIDERCHAR \"%c\" ;\n", hd);
+
+//   char left_bus, right_bus;
+//   block->getBusDelimeters(left_bus, right_bus);
+
+//   if ((left_bus == 0) || (right_bus == 0)) {
+//     left_bus = '[';
+//     right_bus = ']';
+//   }
+
+//   fprintf(_out, "BUSBITCHARS \"%c%c\" ;\n", left_bus, right_bus);
+
+//   std::string bname = block->getName();
+//   fprintf(_out, "DESIGN %s ;\n", bname.c_str());
+
+//   fprintf(_out, "UNITS DISTANCE MICRONS %d ;\n", block->getDefUnits());
+
+//   writePropertyDefinitions(block);
+
+//   Rect r = block->getDieArea();
+
+//   int x1 = defdist(r.xMin());
+//   int y1 = defdist(r.yMin());
+//   int x2 = defdist(r.xMax());
+//   int y2 = defdist(r.yMax());
+
+//   if ((x1 != 0) || (y1 != 0) || (x2 != 0) || (y2 != 0)) {
+//     fprintf(_out, "DIEAREA ( %d %d ) ( %d %d ) ;\n", x1, y1, x2, y2);
+//   }
+
+//   writeRows(block);
+//   writeTracks(block);
+//   writeGCells(block);
+//   writeVias(block);
+//   writeNonDefaultRules(block);
+//   writeRegions(block);
+//   if (_version == defout::DEF_5_8) {
+//     writeComponentMaskShift(block);
+//   }
+//   writeInstsLayer(block);
+//   writeBTerms(block);
+//   writePinProperties(block);
+//   writeBlockages(block);
+//   writeFills(block);
+//   writeNets(block);
+//   writeGroups(block);
+//   writeScanChains(block);
+
+//   fprintf(_out, "END DESIGN\n");
+//   {
+//     delete _select_net_map;
+//   }
+//   {
+//     delete _select_inst_map;
+//   }
+//   return true;
+// }
 
 void defout_impl::writeRows(dbBlock* block)
 {
@@ -524,11 +688,32 @@ void defout_impl::writeComponentMaskShift(dbBlock* block)
   fprintf(_out, ";\n");
 }
 
+// write the instances
 void defout_impl::writeInsts(dbBlock* block)
 {
   dbSet<dbInst> insts = block->getInsts();
 
   fprintf(_out, "COMPONENTS %u ;\n", insts.size());
+
+  // Sort the components for consistent output
+  for (dbInst* inst : sortedSet(insts)) {
+    if (_select_inst_map && !(*_select_inst_map)[inst]) {
+      continue;
+    }
+    writeInst(inst);
+  }
+
+  fprintf(_out, "END COMPONENTS\n");
+}
+
+
+// write the instances
+void defout_impl::writeInstsLayer(dbBlock* block)
+{
+  dbSet<dbInst> insts = block->getInsts();
+
+  fprintf(_out, "COMPONENTS %u ;\n", _select_inst_list.size());
+  // fprintf(_out, "COMPONENTS %u ;\n", insts.size());
 
   // Sort the components for consistent output
   for (dbInst* inst : sortedSet(insts)) {

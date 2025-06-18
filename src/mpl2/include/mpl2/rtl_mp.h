@@ -100,7 +100,10 @@ class MacroPlacer2
              float min_ar,
              int snap_layer,
              bool bus_planning_flag,
-             const char* report_directory);
+             const char* report_directory,
+             bool floorplan_threedim,
+             bool floorplan_read,
+             bool floorplan_continue);
 
   void placeMacro(odb::dbInst* inst,
                   const float& x_origin,

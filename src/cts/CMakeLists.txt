@@ -33,7 +33,11 @@
 ##
 ###############################################################################
 
-find_package(Boost REQUIRED)
+set(Boost_NO_SYSTEM_PATHS on CACHE BOOL "Do not search system for Boost" )
+set(Boost_INCLUDE_DIR "/research/d4/gds/bqfu21/usr/local/boost_1_68_0/install/include" CACHE PATH "Boost include path" )
+set(BOOST_ROOT "/research/d4/gds/bqfu21/usr/local/boost_1_68_0/install" CACHE PATH "Boost library path" )
+
+find_package(Boost REQUIRED COMPONENTS regex)
 
 add_subdirectory(src)
 if (ENABLE_TESTS)

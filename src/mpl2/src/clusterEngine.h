@@ -156,6 +156,7 @@ class ClusteringEngine
   // Methods to update the tree as the hierarchical
   // macro placement runs.
   void updateConnections();
+  std::vector<std::vector<int>> obtainConnections();
   void updateDataFlow();
   void updateInstancesAssociation(Cluster* cluster);
   void updateInstancesAssociation(odb::dbModule* module,
@@ -168,6 +169,7 @@ class ClusteringEngine
                                std::map<int, int>& cluster_to_macro,
                                std::set<odb::dbMaster*>& masters);
   void clearTempMacroClusterMapping(const UniqueClusterVector& macro_clusters);
+  void printPhysicalHierarchyTree(Cluster* parent, int level);
 
  private:
   using UniqueClusterQueue = std::queue<std::unique_ptr<Cluster>>;
@@ -190,6 +192,7 @@ class ClusteringEngine
   void breakCluster(Cluster* parent);
   void createFlatCluster(odb::dbModule* module, Cluster* parent);
   void addModuleLeafInstsToCluster(Cluster* cluster, odb::dbModule* module);
+  void addModuleAllInstsToCluster(Cluster* cluster, odb::dbModule* module);
   void createCluster(odb::dbModule* module, Cluster* parent);
   void createCluster(Cluster* parent);
   void updateSubTree(Cluster* parent);
@@ -250,7 +253,7 @@ class ClusteringEngine
   std::set<int> computeSinks(const std::set<odb::dbInst*>& insts);
   float computeConnWeight(int hops);
 
-  void printPhysicalHierarchyTree(Cluster* parent, int level);
+  // void printPhysicalHierarchyTree(Cluster* parent, int level);
   float computeMicronArea(odb::dbInst* inst);
 
   static bool isIgnoredMaster(odb::dbMaster* master);
@@ -264,7 +267,7 @@ class ClusteringEngine
   PhysicalHierarchy* tree_{nullptr};
 
   int level_{0};  // Current level
-  int id_{0};     // Current "highest" id
+  int id_{0};     // Current "highest" id for the cluster
 
   // Size limits of the current level
   int max_macro_{0};

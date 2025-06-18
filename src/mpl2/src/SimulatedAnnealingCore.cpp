@@ -126,7 +126,7 @@ void SimulatedAnnealingCore<T>::setNets(const std::vector<BundledNet>& nets)
 
 template <class T>
 void SimulatedAnnealingCore<T>::setFences(const std::map<int, Rect>& fences)
-{
+{ 
   fences_ = fences;
 }
 
@@ -142,6 +142,7 @@ void SimulatedAnnealingCore<T>::setInitialSequencePair(
 {
   if (sequence_pair.pos_sequence.empty()
       || sequence_pair.neg_sequence.empty()) {
+    // std::cout<<"Sequence pair intialize: "<<sequence_pair.pos_sequence.size()<<", "<<sequence_pair.neg_sequence.size()<<std::endl;
     return;
   }
 
@@ -369,10 +370,15 @@ void SimulatedAnnealingCore<T>::calGuidancePenalty()
 template <class T>
 void SimulatedAnnealingCore<T>::packFloorplan()
 {
+  // std::cout<<"Packing Floorplan 1!"<<std::endl;
   for (auto& macro_id : pos_seq_) {
+    // if (macro_id >= macros_.size())
+    //     std::cout<<"macro_id: "<<macro_id<<", macros_ size: "<<macros_.size()<<std::endl;
     macros_[macro_id].setX(0.0);
     macros_[macro_id].setY(0.0);
   }
+
+  // std::cout<<"Packing Floorplan 2!"<<std::endl;
 
   // Each index corresponds to a macro id whose pair is:
   // <Position in Positive Sequence , Position in Negative Sequence>
@@ -380,14 +386,32 @@ void SimulatedAnnealingCore<T>::packFloorplan()
 
   // calculate X position
   for (int i = 0; i < pos_seq_.size(); i++) {
+      // if (i >= neg_seq_.size())
+      //   std::cout<<"i: "<<i<<", neg_seq_ size: "<<neg_seq_.size()<<std::endl;
+      // if (pos_seq_[i] >= sequence_pair_pos.size())
+      //   std::cout<<"pos_seq_[i]: "<<pos_seq_[i]<<", sequence_pair_pos size: "<<sequence_pair_pos.size()<<std::endl;
+      // if (neg_seq_[i] >= sequence_pair_pos.size())
+      //   std::cout<<"neg_seq_[i]: "<<neg_seq_[i]<<", sequence_pair_pos size: "<<sequence_pair_pos.size()<<std::endl;
     sequence_pair_pos[pos_seq_[i]].first = i;
     sequence_pair_pos[neg_seq_[i]].second = i;
   }
 
+  // std::cout<<"Packing Floorplan 3!"<<std::endl;
+
   std::vector<float> accumulated_length(pos_seq_.size(), 0.0);
+
+  // if (pos_seq_.size() - 1 >= accumulated_length.size())
+  // {
+  //   std::cout<<"sequence_pair_pos.size(): "<<sequence_pair_pos.size()<<std::endl;
+  //   std::cout<<"pos_seq_.size() - 1 (0): "<<pos_seq_.size() - 1<<", accumulated_length.size(): "<<accumulated_length.size()<<std::endl;
+  // }
+
   for (int i = 0; i < pos_seq_.size(); i++) {
     const int macro_id = pos_seq_[i];
-
+    // if (macro_id >= macros_.size())
+    //   std::cout<<"macro_id: "<<macro_id<<", macros_.size()"<<macros_.size()<<std::endl;
+    // if (macro_id >= sequence_pair_pos.size())
+    //   std::cout<<"macro_id: "<<macro_id<<", sequence_pair_pos.size()"<<sequence_pair_pos.size()<<std::endl;
     // There may exist pin access macros with zero area in our sequence pair
     // when bus planning is on. This check is a temporary approach.
     if (macros_[macro_id].getWidth() <= 0
@@ -397,12 +421,17 @@ void SimulatedAnnealingCore<T>::packFloorplan()
 
     const int neg_seq_pos = sequence_pair_pos[macro_id].second;
 
+    // if (neg_seq_pos >= accumulated_length.size())
+    //   std::cout<<"neg_seq_pos: "<<neg_seq_pos<<", accumulated_length.size()"<<accumulated_length.size()<<std::endl;
+
     macros_[macro_id].setX(accumulated_length[neg_seq_pos]);
 
     const float current_length
         = macros_[macro_id].getX() + macros_[macro_id].getWidth();
 
     for (int j = neg_seq_pos; j < neg_seq_.size(); j++) {
+      // if (j >= accumulated_length.size())
+      //     std::cout<<"j: "<<j<<", accumulated_length.size(): "<<accumulated_length.size()<<std::endl;
       if (current_length > accumulated_length[j]) {
         accumulated_length[j] = current_length;
       } else {
@@ -411,16 +440,36 @@ void SimulatedAnnealingCore<T>::packFloorplan()
     }
   }
 
+  // std::cout<<"Packing Floorplan 4!"<<std::endl;
+  // if (pos_seq_.size() - 1 >= accumulated_length.size())
+  // {
+  //   std::cout<<"macros size: "<<macros_.size()<<std::endl;
+  //   std::cout<<"pos_seq_.size() - 1 (1): "<<pos_seq_.size() - 1<<", accumulated_length.size(): "<<accumulated_length.size()<<std::endl;
+  // }
   width_ = accumulated_length[pos_seq_.size() - 1];
 
   // calulate Y position
   std::vector<int> reversed_pos_seq(pos_seq_.size());
   for (int i = 0; i < reversed_pos_seq.size(); i++) {
+      // if ((reversed_pos_seq.size() - 1 - i )>= pos_seq_.size())
+      //     std::cout<<"reversed_pos_seq.size() - 1 - i: "<<(reversed_pos_seq.size() - 1 - i)<<", pos_seq_.size(): "<<pos_seq_.size()<<std::endl;
     reversed_pos_seq[i] = pos_seq_[reversed_pos_seq.size() - 1 - i];
   }
 
+  // std::cout<<"Packing Floorplan 5!"<<std::endl;
+
   for (int i = 0; i < pos_seq_.size(); i++) {
-    sequence_pair_pos[reversed_pos_seq[i]].first = i;
+    // if (reversed_pos_seq[i] >= sequence_pair_pos.size())
+    //       std::cout<<"reversed_pos_seq[i]: "<<reversed_pos_seq[i]<<", sequence_pair_pos.size(): "<<sequence_pair_pos.size()<<std::endl;
+    // if (neg_seq_[i] >= sequence_pair_pos.size())
+    //       std::cout<<"neg_seq_[i]: "<<neg_seq_[i]<<", sequence_pair_pos.size(): "<<sequence_pair_pos.size()<<std::endl;
+    // if (i >= reversed_pos_seq.size())
+    //       std::cout<<"i: "<<i<<", reversed_pos_seq.size(): "<<reversed_pos_seq.size()<<std::endl;
+    // if (i >= neg_seq_.size())
+    //       std::cout<<"i: "<<i<<", neg_seq_.size(): "<<neg_seq_.size()<<std::endl;
+    // if (i >= accumulated_length.size())
+    //       std::cout<<"i: "<<i<<", accumulated_length.size(): "<<accumulated_length.size()<<std::endl; 
+    // sequence_pair_pos[reversed_pos_seq[i]].first = i;
     sequence_pair_pos[neg_seq_[i]].second = i;
 
     // This is actually the accumulated height, but we use the same vector
@@ -428,9 +477,14 @@ void SimulatedAnnealingCore<T>::packFloorplan()
     accumulated_length[i] = 0.0;
   }
 
-  for (int i = 0; i < pos_seq_.size(); i++) {
-    const int macro_id = reversed_pos_seq[i];
+  // std::cout<<"Packing Floorplan 6!"<<std::endl;
 
+  for (int i = 0; i < pos_seq_.size(); i++) {
+    // if (i >= reversed_pos_seq.size())
+    //     std::cout<<"i: "<<i<<", reversed_pos_seq.size(): "<<reversed_pos_seq.size()<<std::endl;
+    const int macro_id = reversed_pos_seq[i];
+    // if (macro_id >= macros_.size())
+    //   std::cout<<"macro_id: "<<macro_id<<", macros_.size()"<<macros_.size()<<std::endl;
     // There may exist pin access macros with zero area in our sequence pair
     // when bus planning is on. This check is a temporary approach.
     if (macros_[macro_id].getWidth() <= 0
@@ -438,14 +492,21 @@ void SimulatedAnnealingCore<T>::packFloorplan()
       continue;
     }
 
+    // if (macro_id >= sequence_pair_pos.size())
+    //   std::cout<<"macro_id: "<<macro_id<<", sequence_pair_pos.size()"<<sequence_pair_pos.size()<<std::endl;
+
     const int neg_seq_pos = sequence_pair_pos[macro_id].second;
 
+    // if (neg_seq_pos >= accumulated_length.size())
+    //   std::cout<<"neg_seq_pos: "<<neg_seq_pos<<", accumulated_length.size()"<<accumulated_length.size()<<std::endl;
     macros_[macro_id].setY(accumulated_length[neg_seq_pos]);
 
     const float current_height
         = macros_[macro_id].getY() + macros_[macro_id].getHeight();
 
     for (int j = neg_seq_pos; j < neg_seq_.size(); j++) {
+        // if (j >= accumulated_length.size())
+        //   std::cout<<"j: "<<j<<", accumulated_length.size(): "<<accumulated_length.size()<<std::endl;
       if (current_height > accumulated_length[j]) {
         accumulated_length[j] = current_height;
       } else {
@@ -454,7 +515,13 @@ void SimulatedAnnealingCore<T>::packFloorplan()
     }
   }
 
+  // std::cout<<"Packing Floorplan 7!"<<std::endl;
+  // if (pos_seq_.size() - 1 >= accumulated_length.size())
+  //     std::cout<<"pos_seq_.size() - 1 (2): "<<pos_seq_.size() - 1<<", accumulated_length.size(): "<<accumulated_length.size()<<std::endl;
+
   height_ = accumulated_length[pos_seq_.size() - 1];
+
+  // std::cout<<"Packing Floorplan 8!"<<std::endl;
 
   if (graphics_) {
     graphics_->saStep(macros_);

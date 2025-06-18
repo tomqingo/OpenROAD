@@ -42,6 +42,8 @@ if (NOT TCL_LIB_PATHS)
     set(TCL_LIB_PATHS /usr/lib /usr/local/lib)
     set(TCL_NO_DEFAULT_PATH FALSE)
   endif()
+else()
+  set(TCL_NO_DEFAULT_PATH TRUE)
 endif()
 
 if (NOT TCL_LIBRARY)

@@ -40,6 +40,7 @@ namespace odb {
 
 class defout_impl;
 class dbNet;
+class dbInst;
 class dbBlock;
 
 class defout
@@ -64,9 +65,12 @@ class defout
   void setUseNetInstIds(bool value);
   void setUseMasterIds(bool value);
   void selectNet(dbNet* net);
+  void selectInst(dbInst* inst);
+  void clearInst();
   void setVersion(Version v);  // default is 5.8
 
   bool writeBlock(dbBlock* block, const char* def_file);
+  bool writeBlockLayer(dbBlock* block, const char* def_file);
 };
 
 }  // namespace odb

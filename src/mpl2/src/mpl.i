@@ -86,7 +86,10 @@ bool rtl_macro_placer_cmd(const int max_num_macro,
                           const float min_ar,
                           const int snap_layer,
                           const bool bus_planning_on,
-                          const char* report_directory) {
+                          const char* report_directory,
+                          const bool floorplan_threedim,
+                          const bool floorplan_read,
+                          const bool floorplan_continue) {
 
   auto macro_placer = getMacroPlacer2();
   const int num_threads = ord::OpenRoad::openRoad()->getThreadCount();
@@ -121,7 +124,10 @@ bool rtl_macro_placer_cmd(const int max_num_macro,
                              min_ar,
                              snap_layer,
                              bus_planning_on,
-                             report_directory);
+                             report_directory,
+                             floorplan_threedim,
+                             floorplan_read,
+                             floorplan_continue);
 }
 
 void set_debug_cmd(odb::dbBlock* block,

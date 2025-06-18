@@ -62,7 +62,10 @@ sta::define_cmd_args "rtl_macro_placer" { -max_num_macro  max_num_macro \
                                           -snap_layer snap_layer \
                                           -bus_planning \
                                           -report_directory report_directory \
-                                          -write_macro_placement file_name \
+                                          -floorplan_threedim floorplan_threedim \
+                                          -floorplan_read floorplan_read \
+                                          -floorplan_continue floorplan_continue \
+                                          -write_macro_placement file_name
                                         }
 proc rtl_macro_placer { args } {
   sta::parse_key_args "rtl_macro_placer" args \
@@ -75,7 +78,10 @@ proc rtl_macro_placer { args } {
          -pin_access_th -target_util \
          -target_dead_space -min_ar -snap_layer \
          -report_directory \
-         -write_macro_placement } \
+         -floorplan_threedim \
+         -floorplan_read \
+         -floorplan_continue \
+         -write_macro_placement} \
     flags {-bus_planning}
 
   sta::check_argc_eq0 "rtl_macro_placer" $args
@@ -119,7 +125,10 @@ proc rtl_macro_placer { args } {
   set min_ar 0.33
   set snap_layer -1
   set report_directory "hier_rtlmp"
-
+  set floorplan_threedim true
+  set floorplan_read false
+  set floorplan_continue true
+  
   if { [info exists keys(-max_num_macro)] } {
     set max_num_macro $keys(-max_num_macro)
   }
@@ -215,6 +224,19 @@ proc rtl_macro_placer { args } {
   if { [info exists keys(-snap_layer)] } {
     set snap_layer $keys(-snap_layer)
   }
+
+  if { [info exists keys(-floorplan_threedim)] } {
+    set floorplan_threedim $keys(-floorplan_threedim)
+  }
+
+  if { [info exists keys(-floorplan_read)] } {
+    set floorplan_read $keys(-floorplan_read)
+  }
+
+  if { [info exists keys(-floorplan_continue)] } {
+    set floorplan_continue $keys(-floorplan_continue)
+  }
+
   if { [info exists keys(-report_directory)] } {
     set report_directory $keys(-report_directory)
   }
@@ -248,6 +270,9 @@ proc rtl_macro_placer { args } {
                                    $snap_layer \
                                    [info exists flags(-bus_planning)] \
                                    $report_directory \
+                                   $floorplan_threedim \
+                                   $floorplan_read \
+                                   $floorplan_continue \
                                    ]} {
 
     return false

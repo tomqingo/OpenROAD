@@ -259,6 +259,7 @@ int main(int argc, char* argv[])
 
   cmd_argc = argc;
   cmd_argv = argv;
+
 #ifdef ENABLE_PYTHON3
   if (findCmdLineFlag(cmd_argc, cmd_argv, "-python")) {
     // Setup the app with tcl
@@ -293,6 +294,7 @@ int main(int argc, char* argv[])
 #else
     initPython();
     bool exit = findCmdLineFlag(cmd_argc, cmd_argv, "-exit");
+    
     std::vector<wchar_t*> args;
     args.push_back(Py_DecodeLocale(cmd_argv[0], nullptr));
     if (!exit) {
@@ -387,6 +389,7 @@ static int tclAppInit(int& argc,
     }
 
     const char* threads = findCmdLineKey(argc, argv, "-threads");
+
     if (threads) {
       ord::OpenRoad::openRoad()->setThreadCount(threads);
     } else {

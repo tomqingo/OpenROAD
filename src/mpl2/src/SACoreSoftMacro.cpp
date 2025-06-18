@@ -353,6 +353,7 @@ void SACoreSoftMacro::initialize()
     notch_penalty_ = notch_penalty_list[i];
     cost_list.push_back(calNormCost());
   }
+  
   float delta_cost = 0.0;
   for (int i = 1; i < cost_list.size(); i++) {
     delta_cost += std::abs(cost_list[i] - cost_list[i - 1]);
@@ -919,6 +920,7 @@ void SACoreSoftMacro::fillDeadSpace()
   y_point.insert(0.0);
   x_point.insert(outline_.getWidth());
   y_point.insert(outline_.getHeight());
+  
   // create grid
   std::vector<float> x_grid(x_point.begin(), x_point.end());
   std::vector<float> y_grid(y_point.begin(), y_point.end());

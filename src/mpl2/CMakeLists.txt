@@ -86,11 +86,17 @@ target_include_directories(mpl2
     src
 )
 
+find_library(LIB_PATOH patoh /uac/gds/qluo22/disk/projects/OpenROAD-flow-scripts/tools/OpenROAD/src/mpl2/include/mpl2/patoh)
+message(${LIB_PATOH})
+
 target_link_libraries(mpl2
     mpl2_lib
     gui
+    ${LIB_PATOH}
 )
 
-if(ENABLE_TESTS)
-  add_subdirectory(test)
-endif()
+#target_link_libraries(mpl2 /uac/gds/qluo22/disk/projects/OpenROAD-flow-scripts/tools/OpenROAD/src/mpl2/include/mpl2/patoh/libpatoh.a)
+
+#if(ENABLE_TESTS)
+#  add_subdirectory(test)
+#endif()

@@ -49,7 +49,8 @@ rtl_macro_placer
     [-snap_layer snap_layer]
     [-bus_planning]
     [-report_directory report_directory]
-    [-write_macro_placement file_name]
+    [-cluster_info_directory cluster_info_direcotry]
+    [-write_macro_placement macro_file_name]
 ```
 
 #### Options
@@ -73,6 +74,7 @@ rtl_macro_placer
 | `-snap_layer` | Snap macro origins to this routing layer track. The default value is 4, and the allowed values are integers `[1, MAX_LAYER]`). |
 | `-bus_planning` | Flag to enable bus planning. We recommend to enable bus planning for technologies with very limited routing layers such as SKY130 and GF180. As for technologies such as NanGate45 and ASAP7, we recommend to keep it disabled. |
 | `-report_directory` | Save reports to this directory. |
+| `-cluster_info_directory` | Save cluster information to this directory. |
 | `-write_macro_placement` | Generates a file with the design's macro placement in the format of calls for the `place_macro` command. |
 
 #### Simulated Annealing Weight parameters

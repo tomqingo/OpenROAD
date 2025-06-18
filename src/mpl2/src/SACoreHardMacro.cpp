@@ -153,6 +153,7 @@ void SACoreHardMacro::perturb()
   const float action_prob_2 = action_prob_1 + neg_swap_prob_;
   const float action_prob_3 = action_prob_2 + double_swap_prob_;
   const float action_prob_4 = action_prob_3 + exchange_prob_;
+  
   if (op <= action_prob_1) {
     action_id_ = 1;
     singleSeqSwap(true);  // Swap two macros in pos_seq_
@@ -211,6 +212,7 @@ void SACoreHardMacro::initialize()
 {
   initSequencePair();
 
+  // different loss
   std::vector<float> area_penalty_list;
   std::vector<float> outline_penalty_list;
   std::vector<float> wirelength_list;
@@ -218,6 +220,7 @@ void SACoreHardMacro::initialize()
   std::vector<float> fence_penalty_list;
   std::vector<float> width_list;
   std::vector<float> height_list;
+
   for (int i = 0; i < num_perturb_per_step_; i++) {
     perturb();
     // store current penalties

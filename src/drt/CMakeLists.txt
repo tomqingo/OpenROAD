@@ -46,7 +46,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported OUTPUT error)
 
-find_package(Boost REQUIRED COMPONENTS serialization)
+set(Boost_NO_SYSTEM_PATHS on CACHE BOOL "Do not search system for Boost" )
+set(Boost_INCLUDE_DIR "/research/d4/gds/bqfu21/usr/local/boost_1_68_0/install/include" CACHE PATH "Boost include path" )
+set(BOOST_ROOT "/research/d4/gds/bqfu21/usr/local/boost_1_68_0/install" CACHE PATH "Boost library path" )
+
+find_package(Boost REQUIRED COMPONENTS serialization regex)
 find_package(OpenMP REQUIRED)
 find_package(VTune)
 

@@ -93,6 +93,7 @@ class defout_impl
   void writeVia(dbVia* via);
   void writeComponentMaskShift(dbBlock* block);
   void writeInsts(dbBlock* block);
+  void writeInstsLayer(dbBlock* block);
   void writeNonDefaultRules(dbBlock* block);
   void writeNonDefaultRule(dbTechNonDefaultRule* rule);
   void writeLayerRule(dbTechLayerRule* rule);
@@ -144,7 +145,9 @@ class defout_impl
   void selectInst(dbInst* inst);
   void setVersion(int v) { _version = v; }
 
-  bool writeBlock(dbBlock* block, const char* def_file);
+  void clearNet();
+  void clearInst();
+  bool writeBlock(dbBlock* block, const char* def_file, bool layer);
 };
 
 }  // namespace odb

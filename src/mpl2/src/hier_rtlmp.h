@@ -127,6 +127,9 @@ class HierRTLMP
   void setMinAR(float min_ar);
   void setSnapLayer(int snap_layer);
   void setReportDirectory(const char* report_directory);
+  void setFloorplanThreeDim(bool floorplan_threedim);
+  void setFloorplanRead(bool floorplan_read);
+  void setFloorplanContinue(bool floorplan_continue);
   void setDebug(std::unique_ptr<Mpl2Observer>& graphics);
   void setDebugShowBundledNets(bool show_bundled_nets);
   void setDebugSkipSteps(bool skip_steps);
@@ -137,6 +140,11 @@ class HierRTLMP
   void setMacroPlacementFile(const std::string& file_name);
   void writeMacroPlacement(const std::string& file_name);
 
+  void writeTreeInfo(const std::string& dir_name);
+
+  void writeDef(const char* filename, Cluster* parent_part);
+  void writeDef(const char* filename, std::vector<Cluster*> clust_col);
+
  private:
   using SoftSAVector = std::vector<std::unique_ptr<SACoreSoftMacro>>;
   using HardSAVector = std::vector<std::unique_ptr<SACoreHardMacro>>;
@@ -144,6 +152,23 @@ class HierRTLMP
 
   void runMultilevelAutoclustering();
   void runHierarchicalMacroPlacement();
+
+  // calculate the wirelength
+  void calTotalHPWL();
+  void calTreeInfo();
+  std::vector<int> calTreeInfo(Cluster *parent);
+
+  // calculate the overflow
+  bool calisOverlap(Cluster* parent);
+
+  // partition the netlists
+  void part_netlists();
+
+  // run the macro placement for each die
+  void runMacroPlacementPerNetlist();
+
+  // write the floorplan results
+  void writeFloorplanResults(Cluster* parent, const std::string& dir_name, int layer);
 
   void resetSAParameters();
 
@@ -160,6 +185,8 @@ class HierRTLMP
   // Coarse Shaping
   void runCoarseShaping();
   void setRootShapes();
+  // Set the shapes for each die
+  void setPartRootShapes(Cluster* part_root);
   void calculateChildrenTilings(Cluster* parent);
   void calculateMacroTilings(Cluster* cluster);
   void setTightPackingTilings(Cluster* macro_array);
@@ -229,6 +256,10 @@ class HierRTLMP
                        std::vector<BundledNet>& nets_old);
   void adjustCongestionWeight();
 
+  // Read the floorplanning results
+  void readMacroPlacementPerNetlist(std::string filename);
+
+
   // Aux for conversion
   odb::Rect micronsToDbu(const Rect& micron_rect);
 
@@ -254,6 +285,12 @@ class HierRTLMP
 
   // Parameters related to macro placement
   std::string report_directory_;
+
+  bool floorplan_threedim_;
+  bool floorplan_read_;
+  bool floorplan_continue_;
+
+  // The macro placement by OpenROAD
   std::string macro_placement_file_;
 
   // User can specify a global region for some designs
@@ -263,7 +300,9 @@ class HierRTLMP
   float global_fence_uy_ = 0.0;
 
   const int num_runs_ = 10;    // number of runs for SA
+  // const int num_runs_ = 1;
   int num_threads_ = 10;       // number of threads
+  // int num_threads_ = 1;
   const int random_seed_ = 0;  // random seed for deterministic
 
   float target_dead_space_ = 0.2;  // dead space for the cluster
@@ -330,6 +369,10 @@ class HierRTLMP
   bool skip_macro_placement_ = false;
 
   std::unique_ptr<Mpl2Observer> graphics_;
+
+  // The leaf cluster sets after the partition
+  std::vector<std::vector<Cluster*>> partition_results;
+
 };
 
 class Pusher

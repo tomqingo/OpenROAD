@@ -92,7 +92,10 @@ bool MacroPlacer2::place(const int num_threads,
                          const float min_ar,
                          const int snap_layer,
                          const bool bus_planning_on,
-                         const char* report_directory)
+                         const char* report_directory,
+                         const bool floorplan_threedim,
+                         const bool floorplan_read,
+                         const bool floorplan_continue)
 {
   hier_rtlmp_->setClusterSize(
       max_num_macro, min_num_macro, max_num_inst, min_num_inst);
@@ -120,6 +123,9 @@ bool MacroPlacer2::place(const int num_threads,
   hier_rtlmp_->setSnapLayer(snap_layer);
   hier_rtlmp_->setBusPlanningOn(bus_planning_on);
   hier_rtlmp_->setReportDirectory(report_directory);
+  hier_rtlmp_->setFloorplanThreeDim(floorplan_threedim);
+  hier_rtlmp_->setFloorplanRead(floorplan_read);
+  hier_rtlmp_->setFloorplanContinue(floorplan_continue);
   hier_rtlmp_->setNumThreads(num_threads);
 
   hier_rtlmp_->init();

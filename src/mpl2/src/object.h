@@ -512,6 +512,8 @@ class SoftMacro
   // for StdCellCluster and MixedCluster
   void setShapes(const std::vector<std::pair<float, float>>& width_list,
                  float area);
+  void setShapeDirect(float w, float h);
+
   float getX() const { return x_; }
   float getY() const { return y_; }
 

@@ -70,6 +70,16 @@ void defout::selectNet(dbNet* net)
   _writer->selectNet(net);
 }
 
+void defout::selectInst(dbInst* inst)
+{
+  _writer->selectInst(inst);
+}
+
+void defout::clearInst()
+{
+  _writer->clearInst();
+}
+
 void defout::setVersion(Version v)
 {
   _writer->setVersion(v);
@@ -77,7 +87,12 @@ void defout::setVersion(Version v)
 
 bool defout::writeBlock(dbBlock* block, const char* def_file)
 {
-  return _writer->writeBlock(block, def_file);
+  return _writer->writeBlock(block, def_file, 0);
+}
+
+bool defout::writeBlockLayer(dbBlock* block, const char* def_file)
+{
+  return _writer->writeBlock(block, def_file, 1);
 }
 
 }  // namespace odb
