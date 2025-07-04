@@ -270,6 +270,7 @@ void HierRTLMP::run()
 
   // calculate the number of the clusters
   calTreeInfo();
+  writeTreeInfo(report_directory_);
 
   clustering_engine_->printPhysicalHierarchyTree(tree_->root.get(), 0);
 
@@ -396,7 +397,8 @@ void HierRTLMP::part_netlists()
   PaToH_Initialize_Parameters(&args, PATOH_CUTPART, PATOH_SUGPARAM_QUALITY);
   args.seed = -1;
   args._k = 2;
-  args.final_imbal = 0.05;
+  //args.final_imbal = 0.05;
+  args.final_imbal = 0.1; // adjust to 0.1
 
   // calculate the number of the pins
   logger_->report("Calculate pin total");

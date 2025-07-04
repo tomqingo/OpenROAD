@@ -1,7 +1,7 @@
 # Put tool specific ignores in the tool directory, not here.
 
 *.o
-*.a
+#*.a
 *.lo
 *.la
 *.gcov
@@ -38,3 +38,5 @@ debug/
 
 coverage-output
 .metals/
+
+install/
