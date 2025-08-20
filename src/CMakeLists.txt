@@ -130,6 +130,13 @@ else()
   set(ABC_LIBRARY "libabc")
 endif()
 
+# can annotate expat_lib
+#find_library(EXPAT_LIB
+#    NAMES expat expatw
+#    PATHS /research/d4/gds/bqfu21/miniforge3/lib
+#    REQUIRED
+#)
+
 ################################################################
 
 # OSX tcl is deprecated and prints a warning, so look for a user installed
@@ -347,6 +354,45 @@ target_include_directories(openroad
     ../include
 )
 
+#target_link_libraries(openroad
+#  ifp
+#  pad
+#  openroad_swig
+#  gpl
+#  dpl
+#  dpo
+#  fin
+#  rsz
+#  ppl
+#  stt
+#  dbSta
+#  OpenSTA
+#  odb
+#  odbtcl
+#  rcx
+#  rmp
+#  cts
+#  grt
+#  tap
+#  gui
+#  drt
+#  dst
+#  mpl
+#  psm
+#  ant
+#  upf
+#  utl
+#  pdn
+#  dft
+#  mpl2
+#  par
+#  ${ABC_LIBRARY}
+#  ${TCL_LIBRARY}
+#  ${CMAKE_THREAD_LIBS_INIT}
+#  ${EXPAT_LIB}
+#)
+
+
 target_link_libraries(openroad
   ifp
   pad
@@ -383,6 +429,8 @@ target_link_libraries(openroad
   ${TCL_LIBRARY}
   ${CMAKE_THREAD_LIBS_INIT}
 )
+
+
 
 target_compile_definitions(openroad PRIVATE BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 

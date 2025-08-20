@@ -270,6 +270,8 @@ void HierRTLMP::run()
 
   // calculate the number of the clusters
   calTreeInfo();
+
+  // writeTreeInfo
   writeTreeInfo(report_directory_);
 
   clustering_engine_->printPhysicalHierarchyTree(tree_->root.get(), 0);
@@ -671,6 +673,7 @@ void HierRTLMP::readMacroPlacementPerNetlist(std::string filename)
   {
       if (!cluster->isIOCluster() && cluster->isLeaf())
       {
+          // name2Cluster
           name2Cluster[cluster->getName()] = cluster;
       }
   }
@@ -1054,7 +1057,7 @@ void HierRTLMP::writeFloorplanResults(Cluster* parent, const std::string& dir_na
    {
     file.open(floorplan_file);
     file_2.open(macro_info_file);
-    file_2 << "name,w,h\n";
+    file_2 << "name,type,w,h\n";
    }
    else
    {
@@ -1078,8 +1081,11 @@ void HierRTLMP::writeFloorplanResults(Cluster* parent, const std::string& dir_na
         // cluster_name
         std::string cluster_name = cluster->getName();
 
+        // cluster_type
+        std::string cluster_type = cluster->getClusterTypeString();
+
         file << cluster_name << "," << cluster_x << "," << cluster_y << "," << cluster_width << "," << cluster_height << "," << layer << "\n";
-        file_2 << cluster_name << "," << cluster_width << "," << cluster_height << "\n";
+        file_2 << cluster_name << "," << cluster_type << "," << cluster_width << "," << cluster_height << "\n";
       }
    }
 
